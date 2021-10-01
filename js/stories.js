@@ -174,6 +174,7 @@ async function addStoryToPage(evt) {
   };
   const newStory = await storyList.addStory(currentUser,{author,title,url});
   const $story = generateStoryMarkup(newStory);
+  storyList.stories.unshift(newStory);
   $allStoriesList.prepend($story);
   $postForm.hide();
   $allStoriesList.show();

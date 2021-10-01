@@ -27,21 +27,7 @@ class Story {
     // UNIMPLEMENTED: complete this function!
     return "hostname.com";
   }
-
-  async removeStory() {
-    console.debug("removeStory");
-    const response = await axios({
-      url: `${BASE_URL}/stories/${this.storyId}`,
-      method: "DELETE",
-      data: { 
-        token: currentUser.loginToken,
-      },
-    });
-    console.log(response);
-    currentUser = await User.loginViaStoredCredentials(currentUser.loginToken, currentUser.username);
-
-  };
-}
+};
 
 
 /******************************************************************************
@@ -108,7 +94,6 @@ class StoryList {
   /** Update story data in API */
   async updateStory({storyId, author, title, url}) {
     console.debug("updateStory");
-    console.log({storyId, author, title, url})
     const { data: {story} } = await axios({
       url: `${BASE_URL}/stories/${storyId}`,
       method: "PATCH",
@@ -294,4 +279,4 @@ class User {
     });
     currentUser = await User.loginViaStoredCredentials(this.loginToken, this.username);
   };
-}
+};
