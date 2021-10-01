@@ -105,6 +105,26 @@ class StoryList {
     return new Story(story);
   }
 
+  /** Update story data in API */
+  async updateStory({storyId, author, title, url}) {
+    console.debug("updateStory");
+    console.log({storyId, author, title, url})
+    const { data: {story} } = await axios({
+      url: `${BASE_URL}/stories/${storyId}`,
+      method: "PATCH",
+      data: { 
+        token: currentUser.loginToken,
+        story: {
+          author,
+          title,
+          url,
+        }
+      },
+    });
+    currentUser = await User.loginViaStoredCredentials(currentUser.loginToken, currentUser.username);
+  };
+
+  /** Remove story from API */
   async removeStory(story) {
     console.debug("removeStory");
     const response = await axios({
@@ -256,7 +276,7 @@ class User {
   }
 
   async addToFavorites(story) {
-    console.debug("addToFavorites",story);
+    console.debug("addToFavorites");
     const response = await axios({
       url: `${BASE_URL}/users/${this.username}/favorites/${story.storyId}`,
       method: "POST",

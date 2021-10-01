@@ -97,6 +97,11 @@ form > button:hover {
   background-color: dimgray;
 }
 
+.edit {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 form > hr {
   margin: 0;
   border: 1px solid lightgray;

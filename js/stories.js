@@ -34,9 +34,13 @@ function generateStoryMarkup(story) {
       </li>
     `);
   const favoriteIcon = getFavoriteIcon(story);
-  const removeButton = getRemoveButton(story);
-  if (removeButton) {
-    storyElement[0].prepend(removeButton);
+  if (currentUser){
+    if (checkIsUsersStory(story.storyId)){
+      const removeButton = getRemoveButton(story);
+      const editButton = getEditButton(story);
+      storyElement[0].prepend(removeButton);
+      storyElement[0].append(editButton);
+    };
   };
   storyElement[0].prepend(favoriteIcon);
   return storyElement;
@@ -80,22 +84,26 @@ async function handleIconClick(evt,story) {
     };
 };
 
-/** Determines if Remove Button will display **/
+/** Creates a Remove Button for a story **/
 function getRemoveButton(story) {
   const removeButton = document.createElement("span");
   removeButton.innerHTML = "&#216";
   removeButton.classList.toggle("delete");
-  if (currentUser) {
-    const isUsersStory =  checkIsUsersStory(story.storyId);
-    if (isUsersStory) {
-      removeButton.addEventListener("click", async function(evt) {
-        await handleRemoveClick(evt,story);
-      });
-      return removeButton;
-    };
-    return null;
-  };
-  return null;
+  removeButton.addEventListener("click", async function(evt) {
+    await handleRemoveClick(evt,story);
+  });
+  return removeButton;
+};
+
+/** Creates an Edit button for a story */
+function getEditButton(story) {
+  const editButton = document.createElement("span");
+  editButton.innerText = "Edit";
+  editButton.classList.toggle("edit");
+  editButton.addEventListener("click", function(evt) {
+    handleEditClick(evt,story);
+  });
+  return editButton;
 };
 
 /** Determines if story is owned by User */
@@ -115,6 +123,16 @@ async function handleRemoveClick(evt,story) {
     evt.target.parentElement.remove();
     await storyList.removeStory(story);
   };
+};
+
+/** Handler for edit button being clicked */
+function handleEditClick(evt,story) {
+  $updateForm.show();
+  console.log($("#story-update-author"));
+  $("#story-update-author")[0].value = story.author;
+  $("#story-update-title")[0].value = story.title;
+  $("#story-update-url")[0].value = story.url;
+  $updateForm.data.storyId = story.storyId;
 };
 
 /** Gets list of stories from server, generates their HTML, and puts on page. */
@@ -160,3 +178,28 @@ async function addStoryToPage(evt) {
   $postForm.hide();
   $allStoriesList.show();
 };
+
+/** Handler for when a story update is submitted */
+
+async function submitEdit(evt) {
+  console.debug("submitEditStory",evt);
+  const storyToUpdate = $("#update-form").data.storyId;
+  const {author,title,url} = {
+    author: $('#story-update-author')[0].value, 
+    title: $('#story-update-title')[0].value, 
+    url: $('#story-update-url')[0].value,
+  };
+  storyList.updateStory({storyId: storyToUpdate, author, title, url});
+  for (let i=0; i<storyList.stories.length; i++) {
+    if (storyToUpdate === storyList.stories[i].storyId){
+      storyList.stories[i].author = author;
+      storyList.stories[i].title = title;
+      storyList.stories[i].url = url;
+    };
+  }
+  $updateForm.hide();
+  hidePageComponents();
+  putStoriesOnPage();
+};
+
+$body.on("click","#story-update-submit",submitEdit);
