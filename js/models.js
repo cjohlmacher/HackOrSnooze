@@ -170,11 +170,15 @@ class User {
    */
 
   static async signup(username, password, name) {
-    checkUsername(username);
     const response = await axios({
       url: `${BASE_URL}/signup`,
       method: "POST",
       data: { user: { username, password, name } },
+    }).catch((error) => {
+      if (error.response.status === 409) {
+        $usernameTakenError.show();
+        throw(error);
+      };
     });
 
     let { user } = response.data
@@ -189,16 +193,6 @@ class User {
       },
       response.data.token
     );
-  }
-
-  /** check if username already exists */
-  async checkUsername(username) {
-    const response = await axios({
-      url: `${BASE_URL}/users/${username}`,
-      method: "GET",
-      data: { username: username }, 
-    });
-    console.log(response);
   };
 
   /** Login in user with API, make User instance & return it.
@@ -212,6 +206,9 @@ class User {
       url: `${BASE_URL}/login`,
       method: "POST",
       data: { user: { username, password } },
+    }).catch( (error) => {
+      $invalidCredentialsError.show();
+      throw(error);
     });
 
     let { user } = response.data;

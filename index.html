@@ -86,6 +86,7 @@
   <!-- Login form -->
   <form action="#" id="login-form" class="account-form hidden" method="post">
     <h4>Login</h4>
+    <span id="invalid-credentials" class="error hidden">Username and/or password are invalid.</span>
     <div class="login-input">
       <label for="login-username">username</label>
       <input id="login-username" autocomplete="current-username">
@@ -111,6 +112,7 @@
     </div>
     <div class="login-input">
       <label for="signup-username">username</label>
+      <span id="username-error" class="error hidden">Username is already taken.</span>
       <input id="signup-username" autocomplete="new-username">
     </div>
     <div class="login-input">

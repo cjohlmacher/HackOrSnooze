@@ -10,7 +10,7 @@ let currentUser;
 /** Handle login form submission. If login ok, sets up the user instance */
 
 async function login(evt) {
-  console.debug("login", evt);
+  console.debug("login");
   evt.preventDefault();
 
   // grab the username and password

@@ -10,6 +10,8 @@ const $allStoriesList = $("#all-stories-list");
 const $postForm = $("#post-form");
 const $loginForm = $("#login-form");
 const $signupForm = $("#signup-form");
+const $usernameTakenError = $("#username-error");
+const $invalidCredentialsError = $("#invalid-credentials");
 
 const $navLogin = $("#nav-login");
 const $navUserProfile = $("#nav-user-profile");
