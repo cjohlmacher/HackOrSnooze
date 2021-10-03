@@ -87,7 +87,6 @@ class StoryList {
         } 
       },
     });
-    currentUser = await User.loginViaStoredCredentials(currentUser.loginToken, currentUser.username);
     return new Story(story);
   }
 
@@ -106,7 +105,6 @@ class StoryList {
         }
       },
     });
-    currentUser = await User.loginViaStoredCredentials(currentUser.loginToken, currentUser.username);
   };
 
   /** Remove story from API */
@@ -119,20 +117,8 @@ class StoryList {
         token: currentUser.loginToken,
       },
     });
-    const storyIndex = this.findIndexOfStory(story);
-    if (storyIndex !== -1) {
-      this.stories.splice(storyIndex,1);
-    }
-    currentUser = await User.loginViaStoredCredentials(currentUser.loginToken, currentUser.username);
-  };
-
-  findIndexOfStory(story) {
-    for (let i=0; i<this.stories.length; i++){
-      if (story.storyId === this.stories[i].storyId) {
-        return i;
-      };
-    };
-    return -1;
+    removeStoryFromArray(this.stories,story);
+    removeStoryFromArray(currentUser.favorites,story);
   };
 };
 
@@ -267,7 +253,7 @@ class User {
       method: "POST",
       data: { token: this.loginToken }
     });
-    currentUser = await User.loginViaStoredCredentials(this.loginToken, this.username);
+    currentUser.favorites.push(story);
   };
 
   async removeFromFavorites(story) {
@@ -277,6 +263,6 @@ class User {
       method: "DELETE",
       data: { token: this.loginToken }
     });
-    currentUser = await User.loginViaStoredCredentials(this.loginToken, this.username);
+    removeStoryFromArray(currentUser.favorites,story);
   };
 };

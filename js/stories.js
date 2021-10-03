@@ -33,7 +33,6 @@ function generateStoryMarkup(story) {
         <small class="story-user">posted by ${story.username}</small>
       </li>
     `);
-  const favoriteIcon = getFavoriteIcon(story);
   if (currentUser){
     if (checkIsUsersStory(story.storyId)){
       const removeButton = getRemoveButton(story);
@@ -41,36 +40,35 @@ function generateStoryMarkup(story) {
       storyElement[0].prepend(removeButton);
       storyElement[0].append(editButton);
     };
+    const favoriteIcon = getFavoriteIcon(story);
+    storyElement[0].prepend(favoriteIcon);
   };
-  storyElement[0].prepend(favoriteIcon);
   return storyElement;
 };
 
 /** Determines favorite icon to display **/
 function getFavoriteIcon(story) {
   const favoriteIcon = document.createElement("span");
-  if (currentUser) {
-    const isFavorite =  checkUserFavorite(story.storyId);
-    favoriteIcon.innerHTML = `&#x2665`;
-    favoriteIcon.classList.add("favIcon");
-    favoriteIcon.addEventListener("click", async function(evt) {
-        await handleIconClick(evt,story);
-    });
-    if (isFavorite) {
-      favoriteIcon.classList.add("active");
-    }
-  };
+  const isFavorite =  checkUserFavorite(story.storyId);
+  favoriteIcon.innerHTML = `&#x2665`;
+  favoriteIcon.classList.add("favIcon");
+  favoriteIcon.addEventListener("click", async function(evt) {
+      await handleIconClick(evt,story);
+  });
+  if (isFavorite) {
+    favoriteIcon.classList.add("active");
+  }
   return favoriteIcon;
 };
 
 /**  Checks if story is in user's favorites */
 function checkUserFavorite(storyId) {
-  for (let {storyId: favoritedStoryId} of currentUser.favorites){
-    if (storyId === favoritedStoryId) {
+  return currentUser.favorites.some((favoriteStory) => {
+    if (storyId === favoriteStory.storyId) {
       return true;
-    };
-  };
-  return false;
+    }
+    return false;
+  });
 };
 
 /** Handler for favorite icon being clicked */
@@ -87,7 +85,7 @@ async function handleIconClick(evt,story) {
 /** Creates a Remove Button for a story **/
 function getRemoveButton(story) {
   const removeButton = document.createElement("span");
-  removeButton.innerHTML = "&#216";
+  removeButton.innerHTML = "&#10060";
   removeButton.classList.toggle("delete");
   removeButton.addEventListener("click", async function(evt) {
     await handleRemoveClick(evt,story);
@@ -108,12 +106,12 @@ function getEditButton(story) {
 
 /** Determines if story is owned by User */
 function checkIsUsersStory(storyId) {
-  for (let {storyId: usersStoryId} of currentUser.ownStories) {
-    if (storyId === usersStoryId) {
+  return currentUser.ownStories.some((ownStory) => {
+    if (storyId === ownStory.storyId) {
       return true;
-    };
-  };
-  return false;
+    }
+    return false;
+  });
 };
 
 /** Handler for remove button being clicked */
@@ -128,7 +126,6 @@ async function handleRemoveClick(evt,story) {
 /** Handler for edit button being clicked */
 function handleEditClick(evt,story) {
   $updateForm.show();
-  console.log($("#story-update-author"));
   $("#story-update-author")[0].value = story.author;
   $("#story-update-title")[0].value = story.title;
   $("#story-update-url")[0].value = story.url;
@@ -153,10 +150,10 @@ function putStoriesOnPage() {
 
 /** Gets list of favorites from user, generates their HTML, and puts on page */
 
-function putFavoritesOnPage(user) {
+function putFavoritesOnPage() {
   console.debug("putFavoritesOnPage");
   $allStoriesList.empty();
-  for (let story of user.favorites) {
+  for (let story of currentUser.favorites) {
     const $story = generateStoryMarkup(story);
     $allStoriesList.append($story);
   };
@@ -173,6 +170,7 @@ async function addStoryToPage(evt) {
     url: $('#story-url')[0].value,
   };
   const newStory = await storyList.addStory(currentUser,{author,title,url});
+  currentUser.ownStories.push(newStory);
   const $story = generateStoryMarkup(newStory);
   storyList.stories.unshift(newStory);
   $allStoriesList.prepend($story);
@@ -198,9 +196,30 @@ async function submitEdit(evt) {
       storyList.stories[i].url = url;
     };
   }
+  for (let i=0; i<currentUser.favorites.length; i++) {
+    if (storyToUpdate === currentUser.favorites[i].storyId) {
+      currentUser.favorites[i].author = author;
+      currentUser.favorites[i].title = title;
+      currentUser.favorites[i].url = url;
+    };
+  };
   $updateForm.hide();
   hidePageComponents();
   putStoriesOnPage();
 };
 
+/** Helper function to remove a story from an array of stories  */
+function removeStoryFromArray(storyArray,targetStory) {
+  let storyIndex = -1
+  for (let i=0; i<storyArray.length; i++){
+    if (targetStory.storyId === storyArray[i].storyId) {
+      storyIndex = i;
+    };
+  };
+  if (storyIndex !== -1) {
+    storyArray.splice(storyIndex,1);
+  };
+};
+
 $body.on("click","#story-update-submit",submitEdit);
+$body.on("click","#story-submit",addStoryToPage); //Add new story to page

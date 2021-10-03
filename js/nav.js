@@ -22,14 +22,13 @@ function navSubmitClick(evt) {
 };
 
 $body.on("click","#nav-story",navSubmitClick);
-$body.on("click","#story-submit",addStoryToPage); //Add new story to page
 
 /** Show favorite stories when user clicks on Favorites **/
 
 function navFavoritesClick(evt) {
   console.debug("navFavorites");
   hidePageComponents();
-  putFavoritesOnPage(currentUser);
+  putFavoritesOnPage();
 }
 
 $body.on("click",'#nav-favorites',navFavoritesClick);
